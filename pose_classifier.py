@@ -74,7 +74,7 @@ class PoseClassifier:
         
         # Set point confidence
         set_point_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_BENT_ELBOW, ELBOW_ANGLE_TOLERANCE)
-        set_point_position_conf = self.calculate_confidence(wrist_to_head, -0.1, 0.2)  # Slightly above head
+        set_point_position_conf = self.calculate_confidence(wrist_to_head, -0.1, 0.1)  # Slightly above head
         set_point_conf = (set_point_elbow_conf + set_point_position_conf) / 2
         
         # Follow through confidence - wrist must be above head, elbow should be above head
