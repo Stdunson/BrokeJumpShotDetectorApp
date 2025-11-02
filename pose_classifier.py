@@ -34,9 +34,16 @@ class PoseClassifier:
         angle = np.arccos(cosine_angle)
         return np.degrees(angle)
 
+    def calculate_confidence(self, measured_value, ideal_value, tolerance):
+        """Calculate confidence based on how close a measured value is to the ideal value"""
+        difference = abs(measured_value - ideal_value)
+        if difference > tolerance:
+            return max(0, 1 - (difference - tolerance) / tolerance)
+        return 1.0
+
     def classify_shot_phase(self, results):
         if not results.pose_landmarks:
-            return "No pose detected"
+            return "No pose detected", 0.0
 
         # Get relevant landmarks
         landmarks = results.pose_landmarks.landmark
@@ -49,34 +56,46 @@ class PoseClassifier:
         # Calculate elbow angle
         elbow_angle = self.calculate_angle(right_wrist, right_elbow, right_shoulder)
         
-        # Calculate relative positions
-        wrist_height = right_wrist.y
-        head_height = head.y
-        elbow_height = right_elbow.y
-        hip_height = right_hip.y
+        # Calculate relative heights and distances
+        wrist_to_hip = right_wrist.y - right_hip.y
+        wrist_to_head = right_wrist.y - head.y
+        elbow_to_head = right_elbow.y - head.y
         
-        # Define thresholds
-        BENT_ELBOW_MAX = 120  # Angle less than this means elbow is bent
-        STRAIGHT_ELBOW_MIN = 150  # Angle more than this means elbow is straight
+        # Define ideal values and tolerances
+        IDEAL_BENT_ELBOW = 90.0  # 90 degrees for shot pocket and set point
+        IDEAL_STRAIGHT_ELBOW = 170.0  # Nearly straight for follow through
+        ELBOW_ANGLE_TOLERANCE = 20.0
         
-        # Shot pocket detection (elbows bent and near hips)
-        if (elbow_angle < BENT_ELBOW_MAX and 
-            abs(wrist_height - hip_height) < 0.5):
-            return "Shot pocket"
+        # Calculate confidences for each phase
+        # Shot pocket confidence
+        shot_pocket_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_BENT_ELBOW, ELBOW_ANGLE_TOLERANCE)
+        shot_pocket_position_conf = self.calculate_confidence(wrist_to_hip, 0.1, 0.2)  # Slightly above hip
+        shot_pocket_conf = (shot_pocket_elbow_conf + shot_pocket_position_conf) / 2
         
-        # Set point detection (elbows bent and near head)
-        elif (elbow_angle < BENT_ELBOW_MAX and 
-              abs(elbow_height - head_height) < 0.5 and 
-              abs(wrist_height - head_height) < 0.5):
-            return "Set point"
+        # Set point confidence
+        set_point_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_BENT_ELBOW, ELBOW_ANGLE_TOLERANCE)
+        set_point_position_conf = self.calculate_confidence(wrist_to_head, -0.1, 0.2)  # Slightly above head
+        set_point_conf = (set_point_elbow_conf + set_point_position_conf) / 2
         
-        # Follow through detection (elbows straight and above head)
-        elif (elbow_angle > STRAIGHT_ELBOW_MIN and 
-              wrist_height < head_height and 
-              elbow_height < head_height):
-            return "Follow through"
+        # Follow through confidence
+        follow_through_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_STRAIGHT_ELBOW, ELBOW_ANGLE_TOLERANCE)
+        follow_through_position_conf = self.calculate_confidence(wrist_to_head, -0.3, 0.2)  # Well above head
+        follow_through_conf = (follow_through_elbow_conf + follow_through_position_conf) / 2
         
-        return "Undefined shooting position"
+        # Determine phase with highest confidence
+        confidences = {
+            "Shot pocket": shot_pocket_conf,
+            "Set point": set_point_conf,
+            "Follow through": follow_through_conf
+        }
+        
+        phase = max(confidences.items(), key=lambda x: x[1])
+        confidence = round(phase[1], 2)
+        
+        if confidence < 0.3:  # If confidence is too low, return undefined
+            return "Undefined shooting position", 0.0
+            
+        return phase[0], confidence
 
 def process_image(image_path):
     # Initialize classifier
@@ -90,12 +109,12 @@ def process_image(image_path):
     
     # Detect and classify pose
     results = classifier.detect_pose(image)
-    phase = classifier.classify_shot_phase(results)
+    phase, confidence = classifier.classify_shot_phase(results)
     
     # Display the result
-    print(f"Detected phase: {phase}")
+    print(f"Detected phase: {phase} (Confidence: {confidence * 100:.1f}%)")
     
-    return phase
+    return phase, confidence
 
 def main():
     import sys
