@@ -61,10 +61,17 @@ class PoseClassifier:
         wrist_to_head = right_wrist.y - head.y
         elbow_to_head = right_elbow.y - head.y
         
+        # Calculate horizontal distances from head
+        wrist_x_distance = abs(right_wrist.x - head.x)  # Distance of wrist from head horizontally
+        
         # Define ideal values and tolerances
         IDEAL_BENT_ELBOW = 90.0  # 90 degrees for shot pocket and set point
         IDEAL_STRAIGHT_ELBOW = 170.0  # Nearly straight for follow through
         ELBOW_ANGLE_TOLERANCE = 20.0
+        
+        # Ideal horizontal distances for set point
+        IDEAL_SETPOINT_X_DISTANCE = 0.15  # Wrist should be close to head
+        X_DISTANCE_TOLERANCE = 0.15
         
         # Calculate confidences for each phase
         # Shot pocket confidence
@@ -74,17 +81,19 @@ class PoseClassifier:
         
         # Set point confidence
         set_point_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_BENT_ELBOW, ELBOW_ANGLE_TOLERANCE)
-        set_point_position_conf = self.calculate_confidence(wrist_to_head, -0.1, 0.1)  # Slightly above head
-        set_point_conf = (set_point_elbow_conf + set_point_position_conf) / 2
+        set_point_position_conf = self.calculate_confidence(wrist_to_head, -0.1, 0.05)  # Slightly above head
+        set_point_x_conf = self.calculate_confidence(wrist_x_distance, IDEAL_SETPOINT_X_DISTANCE, X_DISTANCE_TOLERANCE)  # Close to head
+        set_point_conf = (set_point_elbow_conf + set_point_position_conf + set_point_x_conf) / 3
         
         # Follow through confidence - wrist must be above head, elbow should be above head
-        if wrist_to_head > 0:  # If wris is below head height, zero confidence
+        if wrist_to_head > 0:  # If wrist is below head height, zero confidence
             follow_through_conf = 0
         else:
             follow_through_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_STRAIGHT_ELBOW, ELBOW_ANGLE_TOLERANCE)
             follow_through_wrist_position_conf = self.calculate_confidence(wrist_to_head, -0.3, 0.2)  # Well above head
-            follow_through_elbow_position_conf = self.calculate_confidence(elbow_to_head, -0.2, 0.2)  # Above head
-            follow_through_conf = (follow_through_elbow_conf + follow_through_wrist_position_conf + follow_through_elbow_position_conf) / 3
+            follow_through_elbow_position_conf = self.calculate_confidence(elbow_to_head, -0.2, 0.1)  # Above head
+            follow_through_conf = (follow_through_elbow_conf + follow_through_wrist_position_conf + 
+                                 follow_through_elbow_position_conf) / 3
         
         # Determine phase with highest confidence
         confidences = {
