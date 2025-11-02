@@ -77,10 +77,14 @@ class PoseClassifier:
         set_point_position_conf = self.calculate_confidence(wrist_to_head, -0.1, 0.2)  # Slightly above head
         set_point_conf = (set_point_elbow_conf + set_point_position_conf) / 2
         
-        # Follow through confidence
-        follow_through_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_STRAIGHT_ELBOW, ELBOW_ANGLE_TOLERANCE)
-        follow_through_position_conf = self.calculate_confidence(wrist_to_head, -0.3, 0.2)  # Well above head
-        follow_through_conf = (follow_through_elbow_conf + follow_through_position_conf) / 2
+        # Follow through confidence - wrist must be above head, elbow should be above head
+        if wrist_to_head > 0:  # If wris is below head height, zero confidence
+            follow_through_conf = 0
+        else:
+            follow_through_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_STRAIGHT_ELBOW, ELBOW_ANGLE_TOLERANCE)
+            follow_through_wrist_position_conf = self.calculate_confidence(wrist_to_head, -0.3, 0.2)  # Well above head
+            follow_through_elbow_position_conf = self.calculate_confidence(elbow_to_head, -0.2, 0.2)  # Above head
+            follow_through_conf = (follow_through_elbow_conf + follow_through_wrist_position_conf + follow_through_elbow_position_conf) / 3
         
         # Determine phase with highest confidence
         confidences = {
