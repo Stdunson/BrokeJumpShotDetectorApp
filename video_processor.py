@@ -53,23 +53,59 @@ class VideoProcessor:
         cap.release()
         return frame_confidences
 
+    def find_best_sequence(self, frame_confidences):
+        """Find the best sequence of frames that maintains the correct order: shot pocket -> set point -> follow through"""
+        if not all(phase in frame_confidences for phase in ["Shot pocket", "Set point", "Follow through"]):
+            return None
+
+        best_sequence = None
+        best_sequence_score = -float('inf')
+        
+        # Get all candidates for each phase
+        pocket_frames = [(conf, frame_num, frame) for conf, frame_num, frame in frame_confidences["Shot pocket"]]
+        set_frames = [(conf, frame_num, frame) for conf, frame_num, frame in frame_confidences["Set point"]]
+        follow_frames = [(conf, frame_num, frame) for conf, frame_num, frame in frame_confidences["Follow through"]]
+        
+        # Try each combination while respecting temporal order using brute force method
+        for pocket_data in pocket_frames:
+            pocket_frame_num = pocket_data[1]
+            for set_data in set_frames:
+                set_frame_num = set_data[1]
+                if set_frame_num <= pocket_frame_num:  # Set point must come after shot pocket
+                    continue
+                for follow_data in follow_frames:
+                    follow_frame_num = follow_data[1]
+                    if follow_frame_num <= set_frame_num:  # Follow through must come after set point
+                        continue
+                    
+                    # Calculate sequence score (sum of confidences)
+                    sequence_score = -sum([pocket_data[0], set_data[0], follow_data[0]])  # Negative because confidences are stored negative
+                    
+                    if sequence_score > best_sequence_score:
+                        best_sequence_score = sequence_score
+                        best_sequence = {
+                            "Shot pocket": (pocket_data[0], pocket_frame_num, pocket_data[2]),
+                            "Set point": (set_data[0], set_frame_num, set_data[2]),
+                            "Follow through": (follow_data[0], follow_frame_num, follow_data[2])
+                        }
+        
+        return best_sequence
+
     def save_best_frames(self, frame_confidences):
-        """Save the single best frame for each phase"""
-        for phase, frames in frame_confidences.items():
-            if not frames:
-                continue
-                
-            # Get the single frame with highest confidence
-            best_frame = heapq.nsmallest(1, frames)[0]  # Using smallest because confidences are negative
-            confidence = -best_frame[0]  # Convert back to positive
-            frame_num = best_frame[1]
-            frame = best_frame[2]
-            
-            # Save the frame
+        """Save the best sequence of frames maintaining temporal order"""
+        best_sequence = self.find_best_sequence(frame_confidences)
+        
+        if best_sequence is None:
+            print("Could not find a complete sequence of shots in the correct order")
+            return
+        
+        # Save frames in order
+        for phase, (confidence, frame_num, frame) in best_sequence.items():
+            confidence = -confidence  # Convert back to positive
             filename = f"{phase.lower().replace(' ', '_')}_{confidence:.2f}.jpg"
             filepath = os.path.join(self.output_dir, filename)
             cv2.imwrite(filepath, frame)
-            print(f"Saved best {phase} frame (Confidence: {confidence:.1%}) to {filename}")
+            print(f"Saved {phase} frame {frame_num} (Confidence: {confidence:.1%}) to {filename}")
 
 def main():
     import sys
