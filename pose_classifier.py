@@ -65,13 +65,13 @@ class PoseClassifier:
         wrist_x_distance = abs(right_wrist.x - head.x)  # Distance of wrist from head horizontally
         
         # Define ideal values and tolerances
-        IDEAL_BENT_ELBOW = 90.0  # 90 degrees for shot pocket and set point
+        IDEAL_BENT_ELBOW = 85.0  # 90 degrees for shot pocket and set point
         IDEAL_STRAIGHT_ELBOW = 170.0  # Nearly straight for follow through
-        ELBOW_ANGLE_TOLERANCE = 20.0
+        ELBOW_ANGLE_TOLERANCE = 25.0
         
         # Ideal horizontal distances for set point
-        IDEAL_SETPOINT_X_DISTANCE = 0.15  # Wrist should be close to head
-        X_DISTANCE_TOLERANCE = 0.15
+        IDEAL_SETPOINT_X_DISTANCE = 0.075  # Wrist should be close to head
+        X_DISTANCE_TOLERANCE = 0.05
         
         # Calculate confidences for each phase
         # Shot pocket confidence
