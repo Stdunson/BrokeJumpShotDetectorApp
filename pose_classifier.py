@@ -70,7 +70,7 @@ class PoseClassifier:
         ELBOW_ANGLE_TOLERANCE = 25.0
         
         # Ideal horizontal distances for set point
-        IDEAL_SETPOINT_X_DISTANCE = 0.075  # Wrist should be close to head
+        IDEAL_SETPOINT_X_DISTANCE = 0.025  # Wrist should be close to head
         X_DISTANCE_TOLERANCE = 0.05
         
         # Calculate confidences for each phase
