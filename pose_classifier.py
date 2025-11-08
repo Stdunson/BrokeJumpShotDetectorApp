@@ -65,12 +65,12 @@ class PoseClassifier:
         wrist_x_distance = abs(right_wrist.x - head.x)  # Distance of wrist from head horizontally
         
         # Define ideal values and tolerances
-        IDEAL_BENT_ELBOW = 85.0  # 90 degrees for shot pocket and set point
+        IDEAL_BENT_ELBOW = 70.0  # 70 degrees for shot pocket and set point
         IDEAL_STRAIGHT_ELBOW = 170.0  # Nearly straight for follow through
-        ELBOW_ANGLE_TOLERANCE = 25.0
+        ELBOW_ANGLE_TOLERANCE = 30.0
         
         # Ideal horizontal distances for set point
-        IDEAL_SETPOINT_X_DISTANCE = 0.025  # Wrist should be close to head
+        IDEAL_SETPOINT_X_DISTANCE = 0.015  # Wrist should be close to head
         X_DISTANCE_TOLERANCE = 0.05
         
         # Calculate confidences for each phase
@@ -83,7 +83,7 @@ class PoseClassifier:
         set_point_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_BENT_ELBOW, ELBOW_ANGLE_TOLERANCE)
         set_point_position_conf = self.calculate_confidence(wrist_to_head, -0.1, 0.05)  # Slightly above head
         set_point_x_conf = self.calculate_confidence(wrist_x_distance, IDEAL_SETPOINT_X_DISTANCE, X_DISTANCE_TOLERANCE)  # Close to head
-        set_point_conf = (set_point_elbow_conf + set_point_position_conf + set_point_x_conf) / 3
+        set_point_conf = (set_point_elbow_conf * .3 + set_point_position_conf * .2 + set_point_x_conf * .5)
         
         # Follow through confidence - wrist must be above head, elbow should be above head
         if wrist_to_head > 0:  # If wrist is below head height, zero confidence
