@@ -48,52 +48,96 @@ class PoseClassifier:
         # Get relevant landmarks
         landmarks = results.pose_landmarks.landmark
         right_wrist = landmarks[self.mp_pose.PoseLandmark.RIGHT_WRIST]
+        left_wrist = landmarks[self.mp_pose.PoseLandmark.LEFT_WRIST]
         right_elbow = landmarks[self.mp_pose.PoseLandmark.RIGHT_ELBOW]
+        left_elbow = landmarks[self.mp_pose.PoseLandmark.LEFT_ELBOW]
         right_shoulder = landmarks[self.mp_pose.PoseLandmark.RIGHT_SHOULDER]
+        left_shoulder = landmarks[self.mp_pose.PoseLandmark.LEFT_SHOULDER]
         right_hip = landmarks[self.mp_pose.PoseLandmark.RIGHT_HIP]
+        left_hip = landmarks[self.mp_pose.PoseLandmark.LEFT_HIP]
         head = landmarks[self.mp_pose.PoseLandmark.NOSE]  # Using nose as head reference
         
+         #Dominant hand determination, only used for set point & follow through, negligible for shot pocket
+        if right_wrist.x < left_wrist.x:
+            dominant_wrist = right_wrist
+            dominant_elbow = right_elbow
+            dominant_shoulder = right_shoulder
+        else:
+            dominant_wrist = left_wrist
+            dominant_elbow = left_elbow
+            dominant_shoulder = left_shoulder
+
         # Calculate elbow angle
-        elbow_angle = self.calculate_angle(right_wrist, right_elbow, right_shoulder)
+        elbow_angle = self.calculate_angle(dominant_wrist, dominant_elbow, dominant_shoulder)
+
+        #calculate wrist heights normalized by body height
+        torso_length = abs(right_shoulder.y - right_hip.y)
+        wrist_height_norm = (right_wrist.y - right_hip.y) / torso_length
         
         # Calculate relative heights and distances
-        wrist_to_hip = right_wrist.y - right_hip.y
-        wrist_to_head = right_wrist.y - head.y
-        elbow_to_head = right_elbow.y - head.y
-        
-        # Calculate horizontal distances from head
-        wrist_x_distance = abs(right_wrist.x - head.x)  # Distance of wrist from head horizontally
-        
-        # Define ideal values and tolerances
-        IDEAL_BENT_ELBOW = 70.0  # 70 degrees for shot pocket and set point
-        IDEAL_STRAIGHT_ELBOW = 170.0  # Nearly straight for follow through
+        wrist_to_head_norm = (dominant_wrist.y - head.y) / torso_length
+        elbow_to_head_norm = (dominant_elbow.y - head.y) / torso_length
+
+        # Define ideal values and tolerances (now relative to body proportions)
+        IDEAL_SHOT_POCKET_ELBOW = 90.0  
+        IDEAL_SET_POINT_ELBOW = 60.0  
+        IDEAL_STRAIGHT_ELBOW = 170.0  
         ELBOW_ANGLE_TOLERANCE = 30.0
-        
-        # Ideal horizontal distances for set point
-        IDEAL_SETPOINT_X_DISTANCE = 0.015  # Wrist should be close to head
-        X_DISTANCE_TOLERANCE = 0.05
-        
+
+        #Ideal ranges for three phases elbow angles
+        SHOT_POCKET_RANGE = (70, 120)
+        SET_POINT_RANGE = (35, 80)
+        FOLLOW_THROUGH_RANGE = (150, 185)
+
+        #Normalized set point distance
+        shoulder_width = abs(right_shoulder.x - left_shoulder.x)
+        shoulder_center_x = (right_shoulder.x + left_shoulder.x) / 2
+        wrist_x_offset = abs(dominant_wrist.x - shoulder_center_x) / shoulder_width
+        IDEAL_SETPOINT_X = 0.15 
+        SETPOINT_TOLERANCE_X = 0.35
+
+        #Ideal vertical distances for shot pocket
+        IDEAL_POCKET_WRIST = -0.02
+        POCKET_TOLERANCE = 0.25
+
+        #Ideal vertical distances for set point
+        IDEAL_SETPOINT_WRIST_HEAD = -0.05 
+        SETPOINT_WRIST_HEAD_TOLERANCE = 0.15
+
+        #Ideal vertical distances for follow through wrist height
+        IDEAL_FT_WRIST = -0.1 
+        FT_TOLERANCE = 0.25
+
+        #Ideal horizontal distances for follow through wrist position
+        wrist_forward = dominant_wrist.x - right_elbow.x
+        IDEAL_FT_FORWARD = -0.05
+        FT_FORWARD_TOLERANCE = 0.15
+
         # Calculate confidences for each phase
-        # Shot pocket confidence
-        shot_pocket_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_BENT_ELBOW, ELBOW_ANGLE_TOLERANCE)
-        shot_pocket_position_conf = self.calculate_confidence(wrist_to_hip, 0.1, 0.2)  # Slightly above hip
-        shot_pocket_conf = (shot_pocket_elbow_conf + shot_pocket_position_conf) / 2
+        # Shot pocket confidence - check if elbow angle is within the ideal range
+        shot_pocket_in_range = SHOT_POCKET_RANGE[0] <= elbow_angle <= SHOT_POCKET_RANGE[1]
+        shot_pocket_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_SHOT_POCKET_ELBOW, ELBOW_ANGLE_TOLERANCE) if shot_pocket_in_range else 0
+        shot_pocket_position_conf = self.calculate_confidence(wrist_height_norm, IDEAL_POCKET_WRIST, POCKET_TOLERANCE)  # Wrist around hip height
+        shot_pocket_conf = (shot_pocket_elbow_conf * 0.6 + shot_pocket_position_conf * 0.4)
         
-        # Set point confidence
-        set_point_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_BENT_ELBOW, ELBOW_ANGLE_TOLERANCE)
-        set_point_position_conf = self.calculate_confidence(wrist_to_head, -0.1, 0.05)  # Slightly above head
-        set_point_x_conf = self.calculate_confidence(wrist_x_distance, IDEAL_SETPOINT_X_DISTANCE, X_DISTANCE_TOLERANCE)  # Close to head
-        set_point_conf = (set_point_elbow_conf * .3 + set_point_position_conf * .2 + set_point_x_conf * .5)
+        # Set point confidence - check if elbow angle is within the ideal range
+        set_point_in_range = SET_POINT_RANGE[0] <= elbow_angle <= SET_POINT_RANGE[1]
+        set_point_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_SET_POINT_ELBOW, ELBOW_ANGLE_TOLERANCE) if set_point_in_range else 0.2
+        set_point_position_conf = self.calculate_confidence(wrist_to_head_norm, IDEAL_SETPOINT_WRIST_HEAD, SETPOINT_WRIST_HEAD_TOLERANCE)  # Slightly above head
+        set_point_x_conf = self.calculate_confidence(wrist_x_offset, IDEAL_SETPOINT_X, SETPOINT_TOLERANCE_X)  # Close to head, normalized
+        set_point_conf = (set_point_elbow_conf * .25 + set_point_position_conf * .55 + set_point_x_conf * .2)
         
-        # Follow through confidence - wrist must be above head, elbow should be above head
-        if wrist_to_head > 0:  # If wrist is below head height, zero confidence
+        # Follow through confidence - check if elbow angle is within the ideal range
+        follow_through_in_range = FOLLOW_THROUGH_RANGE[0] <= elbow_angle <= FOLLOW_THROUGH_RANGE[1]
+        if wrist_to_head_norm > 0:  # If wrist is below head height, zero confidence
             follow_through_conf = 0
         else:
-            follow_through_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_STRAIGHT_ELBOW, ELBOW_ANGLE_TOLERANCE)
-            follow_through_wrist_position_conf = self.calculate_confidence(wrist_to_head, -0.3, 0.2)  # Well above head
-            follow_through_elbow_position_conf = self.calculate_confidence(elbow_to_head, -0.2, 0.1)  # Above head
-            follow_through_conf = (follow_through_elbow_conf + follow_through_wrist_position_conf + 
-                                 follow_through_elbow_position_conf) / 3
+            follow_through_elbow_conf = self.calculate_confidence(elbow_angle, IDEAL_STRAIGHT_ELBOW, ELBOW_ANGLE_TOLERANCE) if follow_through_in_range else 0
+            follow_through_wrist_position_conf = self.calculate_confidence(wrist_to_head_norm, IDEAL_FT_WRIST, FT_TOLERANCE)  # Well above head
+            follow_through_elbow_position_conf = self.calculate_confidence(elbow_to_head_norm, -0.2, 0.1)  # Above head
+            follow_through_forward_conf = self.calculate_confidence(wrist_forward, IDEAL_FT_FORWARD, FT_FORWARD_TOLERANCE)
+            follow_through_conf = (follow_through_elbow_conf * 0.4 + follow_through_wrist_position_conf * 0.2 + 
+                                 follow_through_elbow_position_conf * 0.2 + follow_through_forward_conf * 0.2)
         
         # Determine phase with highest confidence
         confidences = {
