@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LandingPage: View {
     var body: some View {
-        VStack{
+        NavigationStack{
             Text("Broke Jumpshot Detector")
                 .font(.largeTitle)
                 .bold()
@@ -20,24 +20,23 @@ struct LandingPage: View {
             List{
                 NavigationLink(destination: ResultsView()){
                     Text("Past jumpshots go here")
-                        .padding()
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(Color.primary)
+                        .tint(Color.primary)
+                        .padding(7)
+                        .bold()
                 }
             }
             
             NavigationLink(destination: UploadView()){
-                Text("Get Started")
-                    .foregroundStyle(Color.primary)
-                    .padding(15)
+                Text("Get Started") //Change to "Upload" when jumpshot data
+                    .font(.title)
+                    .tint(Color.primary)
+                    .padding(7)
                     .bold()
+                    .background(RoundedRectangle(cornerRadius: 15))
                     .frame(maxWidth: .infinity)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 15)
-                    )
-                
             }
             .padding()
+            .tint(.gray)
         }
     }
 }
