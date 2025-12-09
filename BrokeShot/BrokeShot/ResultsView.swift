@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ResultsView: View {
     
+    let shot: shotData
     
     var body: some View {
         NavigationStack{
@@ -18,33 +19,37 @@ struct ResultsView: View {
                 .padding(.horizontal)
                 .padding(.top)
                 .multilineTextAlignment(.center)
-            Text("BROKE 🧱")
+            Text(determineShotMessage(shot: shot, type: 1))
                 .font(.largeTitle)
                 .bold()
                 .padding(.horizontal)
-                .padding(.bottom)
                 .multilineTextAlignment(.center)
             
             Image(systemName: "basketball") //will show video of the jumper
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.horizontal)
+                .padding()
             
             VStack(alignment: .leading) {
-                Text("Set Point: BROKE 🧱")
+                Text("Shot Pocket: " + determineShotMessage(shot: shot, type: 2))
                     .bold()
                     .padding(.horizontal)
                     .padding(.bottom)
-                Text("Shot Pocket: BROKE 🧱")
+                Text("Set Point: " + determineShotMessage(shot: shot, type: 3))
                     .bold()
                     .padding(.horizontal)
                     .padding(.bottom)
-                Text("Follow Through: BROKE 🧱")
+                Text("Follow Through: " + determineShotMessage(shot: shot, type: 4))
                     .bold()
                     .padding(.horizontal)
                     .padding(.bottom)
             }
+            
+            Text(determineShotMessage(shot: shot, type: 5))
+                .bold()
+                .padding()
+                .multilineTextAlignment(.center)
             
             NavigationLink(destination: LandingPage()){
                 Text("Main Menu")
@@ -62,5 +67,5 @@ struct ResultsView: View {
 }
 
 #Preview {
-    ResultsView()
+    ResultsView(shot: shotData(date: Date(), imageURL: URL(string: "https://example.com/image.png")!, score: 9))
 }

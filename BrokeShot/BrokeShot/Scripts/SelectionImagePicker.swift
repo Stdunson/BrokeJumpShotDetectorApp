@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SelectionImagePicker<Label: View>: View {
     
-    @Binding var selectedImage: UIImage?
+    @Binding var selectedImage: URL?
     @ViewBuilder var label: () -> Label
     
     @State private var isConfirmationDialoguePresented: Bool = false

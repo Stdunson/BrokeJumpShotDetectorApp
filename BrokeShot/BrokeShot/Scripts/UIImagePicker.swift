@@ -19,7 +19,7 @@ struct UIImagePicker: UIViewControllerRepresentable {
     @Environment(\.dismiss) private var dismiss
     
     let imageSourceType: ImageSourceType
-    @Binding var selectedImage: UIImage?
+    @Binding var selectedImage: URL?
     
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self, selectedImage: $selectedImage)
@@ -52,9 +52,9 @@ struct UIImagePicker: UIViewControllerRepresentable {
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate{
         
         let parent: UIImagePicker
-        @Binding var selectedImage: UIImage?
+        @Binding var selectedImage: URL?
         
-        init(parent: UIImagePicker, selectedImage: Binding<UIImage?> = .constant(nil)){
+        init(parent: UIImagePicker, selectedImage: Binding<URL?> = .constant(nil)){
             self.parent = parent
             self._selectedImage = selectedImage
         }
@@ -64,9 +64,9 @@ struct UIImagePicker: UIViewControllerRepresentable {
         }
         
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let uiImage = info[.editedImage] as? UIImage {
+            if let uiImage = info[.editedImage] as? URL{
                 self.selectedImage = uiImage
-            } else if let uiImage = info[.originalImage] as? UIImage {
+            } else if let uiImage = info[.originalImage] as? URL {
                 self.selectedImage = uiImage
             }
             parent.dismiss()

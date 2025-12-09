@@ -16,8 +16,8 @@ struct LandingPage: View {
                 .padding()
                 .multilineTextAlignment(.center)
             
-            //hide when no jumpshot data
-            List{
+            //hide when no jumpshot data, will comment out for now
+            /*
                 NavigationLink(destination: ResultsView()){
                     Text("Past jumpshots go here")
                         .tint(Color.primary)
@@ -25,6 +25,7 @@ struct LandingPage: View {
                         .bold()
                 }
             }
+             */
             
             NavigationLink(destination: UploadView()){
                 Text("Get Started") //Change to "Upload" when jumpshot data

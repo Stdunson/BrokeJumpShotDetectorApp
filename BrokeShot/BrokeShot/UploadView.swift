@@ -16,16 +16,9 @@ let uploadGuidelines: String =
 4. Shooter's full body should be in frame
 """
 
-//The API will return a score, which represents which parts of the shot are broke, from 0-6.
-struct shotData{
-    let date: String
-    //let image: #either image url or image
-    let score: String
-}
-
 struct UploadView: View {
 
-    @State private var selectedImage: UIImage?
+    @State private var selectedImage: URL?
     
     var body: some View {
         NavigationStack{
@@ -53,16 +46,20 @@ struct UploadView: View {
                 .padding(.bottom)
             
             //this navlink should only be active if a video has been submitted
-            NavigationLink(destination: ResultsView()){
-                Text("Submit")
-                    .font(.title)
-                    .tint(Color.primary)
-                    .padding(7)
-                    .bold()
-                    .background(RoundedRectangle(cornerRadius: 15))
+            if let im = selectedImage{
+                let newData = shotData(date: Date(), imageURL: im, score: 0)
+                
+                NavigationLink(destination: ResultsView(shot: newData)){
+                    Text("Submit")
+                        .font(.title)
+                        .tint(Color.primary)
+                        .padding(7)
+                        .bold()
+                        .background(RoundedRectangle(cornerRadius: 15))
+                }
+                .padding()
+                .tint(.gray)
             }
-            .padding()
-            .tint(.gray)
             
         }
     }
