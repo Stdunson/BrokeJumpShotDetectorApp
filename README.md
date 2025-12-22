@@ -43,6 +43,6 @@ POST \analyze
 MLP with mediapipe keypoins, phase as inputs, trained using PyTorch
 
 ## Usage Directions
-* To run FastAPI server: python3 backend/main.py
-* To run API test script: in a separate terminal: python3 backend/test_api.py (path_to_test_video)
-* To run app: download on iPhone using Xcode, won't work properly on simulator. Then, on ShotAnalysisService.swift, put your device's LAN address there instead of "ADDRESS". 
+* To run FastAPI server: python3 backend/main.py. Must train MLP beforehand.
+* To run API test script: in a separate terminal: python3 backend/test_api.py (path_to_test_video).
+* To run app: First, run FastAPI server. Then, download on iPhone using Xcode, won't work properly on simulator. Then, on ShotAnalysisService.swift, put your device's LAN address there instead of "ADDRESS". 
