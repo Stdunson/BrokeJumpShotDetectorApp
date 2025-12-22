@@ -13,7 +13,6 @@ import SwiftData
 struct shotData: Codable {
     let date: Date
     let imageURL: URL
-    let score: Int
 }
 
 //class for swiftdata
@@ -28,35 +27,35 @@ class jumpshot: Identifiable{
     }
 }
 
-func determineShotMessage(shot: shotData, type: Int) -> String{
+func determineShotMessage(score: Int, type: Int) -> String{
     //Type is 1 if overall brokeness, 2 if shot pocket, 3 if set point, 4 if follow through, 5 if message
     switch type{
     case 1:
-        if(shot.score == 9){
+        if(score == 9){
             return "PURE 💦"
         }else{
             return "BROKE 🧱"
         }
     case 2:
-        if(shot.score == 2 || shot.score == 5 || shot.score == 6 || shot.score == 9){
+        if(score == 2 || score == 5 || score == 6 || score == 9){
             return "PURE 💦"
         }else{
             return "BROKE 🧱"
         }
     case 3:
-        if(shot.score == 3 || shot.score == 5 || shot.score == 7  || shot.score == 9){
+        if(score == 3 || score == 5 || score == 7  || score == 9){
             return "PURE 💦"
         }else{
             return "BROKE 🧱"
         }
     case 4:
-        if(shot.score == 4 || shot.score == 6 || shot.score == 7  || shot.score == 9){
+        if(score == 4 || score == 6 || score == 7  || score == 9){
             return "PURE 💦"
         }else{
             return "BROKE 🧱"
         }
     case 5:
-        switch shot.score{ //After make sure, put recommended improvements
+        switch score{ //After make sure, put recommended improvements
         case 0:
             return "Your shot is about as broke as a shot can be 😭 the video uploaded may not be the best. Try another video or restarting your shot anew."
         case 2:

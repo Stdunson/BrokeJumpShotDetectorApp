@@ -29,8 +29,6 @@ struct UploadView: View {
                 .multilineTextAlignment(.center)
             
             //add image which has the video on it, grayscreen as default
-            
-            
             SelectionImagePicker(selectedImage: $selectedImage){
                 Text("Pick your video")
                     .opacity(0.5)
@@ -47,7 +45,7 @@ struct UploadView: View {
             
             //this navlink should only be active if a video has been submitted
             if let im = selectedImage{
-                let newData = shotData(date: Date(), imageURL: im, score: 0)
+                let newData = shotData(date: Date(), imageURL: im)
                 
                 NavigationLink(destination: ResultsView(shot: newData)){
                     Text("Submit")
