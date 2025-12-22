@@ -12,7 +12,7 @@ import SwiftData
 struct BrokeShotApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LandingPage()
         }
     }
 }

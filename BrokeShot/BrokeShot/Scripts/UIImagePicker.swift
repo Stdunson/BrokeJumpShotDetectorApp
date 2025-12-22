@@ -49,7 +49,7 @@ struct UIImagePicker: UIViewControllerRepresentable {
     
     typealias UIViewControllerType = UIImagePickerController
     
-    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate{
+    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         
         let parent: UIImagePicker
         @Binding var selectedImage: URL?
@@ -64,10 +64,8 @@ struct UIImagePicker: UIViewControllerRepresentable {
         }
         
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let uiImage = info[.editedImage] as? URL{
-                self.selectedImage = uiImage
-            } else if let uiImage = info[.originalImage] as? URL {
-                self.selectedImage = uiImage
+            if let videoURL = info[.mediaURL] as? URL {
+                self.selectedImage = videoURL
             }
             parent.dismiss()
         }
