@@ -6,8 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct LandingPage: View {
+    
+    @Environment(\.modelContext) private var modelContext
+    
+    @Query var jumpshots: [jumpshot]
+    
     var body: some View {
         NavigationStack{
             Text("Broke Jumpshot Detector")
@@ -16,8 +22,23 @@ struct LandingPage: View {
                 .padding()
                 .multilineTextAlignment(.center)
             
+            if !jumpshots.isEmpty{
+                ScrollView{
+                    VStack{
+                        ForEach(jumpshots){ item in
+                            NavigationLink(destination: ResultsView(shot: item.shot, pastData: item)){
+                                Text(item.shot.date.formatted(date: .abbreviated, time: .complete))
+                                    .tint(Color.primary)
+                                    .padding(7)
+                                    .bold()
+                            }
+                        }
+                    }
+                }
+            }
             //hide when no jumpshot data, will comment out for now
             /*
+            
                 NavigationLink(destination: ResultsView()){
                     Text("Past jumpshots go here")
                         .tint(Color.primary)
@@ -39,6 +60,7 @@ struct LandingPage: View {
             .padding()
             .tint(.gray)
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
 

@@ -14,5 +14,6 @@ struct BrokeShotApp: App {
         WindowGroup {
             LandingPage()
         }
+        .modelContainer(for: jumpshot.self)
     }
 }

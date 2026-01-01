@@ -7,16 +7,26 @@
 
 import SwiftUI
 import Combine
+import UIKit
 
 @MainActor
 class ShotAnalysisViewModel: ObservableObject{
     @Published var result: ShotAnalysisResponse?
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var firstFrame: UIImage?
+
+    func extractFrame(from videoURL: URL) {
+        Task {
+            self.firstFrame = await VideoFrameExtractor.extractFirstFrame(from: videoURL)
+        }
+    }
 
     func analyze(videoURL: URL) {
         isLoading = true
         errorMessage = nil
+
+        extractFrame(from: videoURL)
 
         ShotAnalysisService.shared.analyzeVideo(videoURL: videoURL) { result in
             DispatchQueue.main.async {

@@ -65,7 +65,20 @@ struct UIImagePicker: UIViewControllerRepresentable {
         
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let videoURL = info[.mediaURL] as? URL {
-                self.selectedImage = videoURL
+                let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                let fileName = videoURL.lastPathComponent
+                let destinationURL = documentsDirectory.appendingPathComponent(fileName)
+                
+                do {
+                    if FileManager.default.fileExists(atPath: destinationURL.path) {
+                        try FileManager.default.removeItem(at: destinationURL)
+                    }
+                    try FileManager.default.copyItem(at: videoURL, to: destinationURL)
+                    self.selectedImage = destinationURL
+                } catch {
+                    print("Error copying video file: \(error)")
+                    self.selectedImage = videoURL
+                }
             }
             parent.dismiss()
         }

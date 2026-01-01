@@ -47,7 +47,7 @@ struct UploadView: View {
             if let im = selectedImage{
                 let newData = shotData(date: Date(), imageURL: im)
                 
-                NavigationLink(destination: ResultsView(shot: newData)){
+                NavigationLink(destination: ResultsView(shot: newData, pastData: nil)){
                     Text("Submit")
                         .font(.title)
                         .tint(Color.primary)
