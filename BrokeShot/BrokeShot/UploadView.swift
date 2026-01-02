@@ -25,7 +25,7 @@ struct UploadView: View {
             Text("Upload Your Jumpshot")
                 .font(.largeTitle)
                 .bold()
-                .padding()
+                .padding(.vertical, 16)
                 .multilineTextAlignment(.center)
             
             //add image which has the video on it, grayscreen as default
@@ -37,26 +37,35 @@ struct UploadView: View {
             Text("Upload Guidelines for Best Results:")
                 .bold()
                 .font(.title2)
-                .padding()
+                .padding(.vertical, 12)
+                .padding(.horizontal)
             
             Text(uploadGuidelines)
-                .padding(.horizontal)
-                .padding(.bottom)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
+                .foregroundColor(.secondary)
             
             //this navlink should only be active if a video has been submitted
             if let im = selectedImage{
                 let newData = shotData(date: Date(), imageURL: im)
                 
-                NavigationLink(destination: ResultsView(shot: newData)){
+                Text("Video Successfully Uploaded!")
+                    .foregroundColor(.green)
+                    .bold()
+                    .padding()
+
+                NavigationLink(destination: ResultsView(shot: newData, pastData: nil)){
                     Text("Submit")
                         .font(.title)
                         .tint(Color.primary)
-                        .padding(7)
+                        .padding(12)
                         .bold()
-                        .background(RoundedRectangle(cornerRadius: 15))
+                        .frame(maxWidth: .infinity)
+                        .background(Color.orange.opacity(0.75))
+                        .cornerRadius(12)
                 }
                 .padding()
-                .tint(.gray)
+                .tint(.blue)
             }
             
         }

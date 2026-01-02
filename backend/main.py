@@ -62,7 +62,7 @@ async def lifespan(app: FastAPI):
         pose_classifier = None
     
     # Load PyTorch model architecture and weights
-    weights_path = Path(__file__).parent.parent / "MLweights" / "broke_jump_shot_detector_weights_v3.pth"
+    weights_path = Path(__file__).parent.parent / "MLweights" / "broke_jump_shot_detector_weights_v4.pth"
     if not weights_path.exists():
         print(f"Warning: Model weights not found at {weights_path}")
         model = None
