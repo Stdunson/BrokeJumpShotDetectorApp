@@ -18,7 +18,7 @@ class ShotAnalysisViewModel: ObservableObject{
 
     func extractFrame(from videoURL: URL) {
         Task {
-            self.firstFrame = await VideoFrameExtractor.extractFirstFrame(from: videoURL)
+            self.firstFrame = await VideoFrameExtractor.extractMiddleFrame(from: videoURL)
         }
     }
 

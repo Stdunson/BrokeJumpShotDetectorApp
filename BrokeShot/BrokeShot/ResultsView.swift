@@ -27,15 +27,16 @@ struct ResultsView: View {
                     .font(.largeTitle)
                     .bold()
                     .padding(.horizontal)
-                    .padding(.top)
+                    .padding(.top, 24)
                     .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
             }else{
                 ScrollView{
                     Text("Your Jumpshot is...")
                         .font(.largeTitle)
                         .bold()
                         .padding(.horizontal)
-                        .padding(.top)
+                        .padding(.top, 24)
                         .multilineTextAlignment(.center)
                     Text(determineShotMessage(score: myScore, type: 1))
                         .font(.largeTitle)
@@ -60,20 +61,28 @@ struct ResultsView: View {
                         }
                     }
                     
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 12) {
                         Text("Shot Pocket: " + determineShotMessage(score: myScore, type: 2))
                             .bold()
-                            .padding(.horizontal)
-                            .padding(.bottom)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.gray.opacity(0.05))
+                            .cornerRadius(8)
                         Text("Set Point: " + determineShotMessage(score: myScore, type: 3))
                             .bold()
-                            .padding(.horizontal)
-                            .padding(.bottom)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.gray.opacity(0.05))
+                            .cornerRadius(8)
                         Text("Follow Through: " + determineShotMessage(score: myScore, type: 4))
                             .bold()
-                            .padding(.horizontal)
-                            .padding(.bottom)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.gray.opacity(0.05))
+                            .cornerRadius(8)
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 16)
                     
                     Text(determineShotMessage(score: myScore, type: 5))
                         .bold()
@@ -86,14 +95,14 @@ struct ResultsView: View {
             NavigationLink(destination: LandingPage()){
                 Text("Main Menu")
                     .tint(Color.primary)
-                    .padding(15)
+                    .padding(12)
                     .bold()
                     .frame(maxWidth: .infinity)
-                    .background(RoundedRectangle(cornerRadius: 15))
-                    .padding()
+                    .background(Color.orange.opacity(0.75))
+                    .cornerRadius(12)
+                    .padding(16)
             }
-            .padding()
-            .tint(.gray)
+            .tint(.blue)
                 
         }
         .onAppear {

@@ -32,6 +32,7 @@ struct UIImagePicker: UIViewControllerRepresentable {
         
         switch imageSourceType {
         case .camera:
+            imagePicker.mediaTypes = ["public.movie"]
             imagePicker.sourceType = .camera
             imagePicker.cameraCaptureMode = .video
         case .photoLibrary:
