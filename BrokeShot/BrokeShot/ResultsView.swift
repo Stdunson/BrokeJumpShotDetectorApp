@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import Combine
 
 struct ResultsView: View {
     
@@ -16,20 +17,27 @@ struct ResultsView: View {
     
     var pastData: jumpshot?
     
+    let loadingMessages = ["Loading", "Loading.", "Loading..", "Loading..."]
+    
     @State var myScore: Int = -1
+    
+    @State private var loadingMessageIndex: Int = 0
     
     @StateObject private var vm = ShotAnalysisViewModel()
     
     var body: some View {
         NavigationStack{
             if myScore == -1 {
-                Text("Loading...")
+                Text(loadingMessages[loadingMessageIndex % loadingMessages.count])
                     .font(.largeTitle)
                     .bold()
                     .padding(.horizontal)
                     .padding(.top, 24)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
+                    .onReceive(Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()) { _ in
+                        loadingMessageIndex += 1
+                    }
             }else{
                 ScrollView{
                     Text("Your Jumpshot is...")
@@ -102,7 +110,7 @@ struct ResultsView: View {
                     .cornerRadius(12)
                     .padding(16)
             }
-            .tint(.blue)
+            .tint(.orange)
                 
         }
         .onAppear {

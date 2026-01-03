@@ -39,31 +39,36 @@ struct LandingPage: View {
                     }
                     .padding(.horizontal, 16)
                 }
-            }
-            //hide when no jumpshot data, will comment out for now
-            /*
-            
-                NavigationLink(destination: ResultsView()){
-                    Text("Past jumpshots go here")
+                
+                NavigationLink(destination: UploadView()){
+                    Text("New Jumpshot")
+                        .font(.title)
                         .tint(Color.primary)
-                        .padding(7)
+                        .padding(12)
                         .bold()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.orange.opacity(0.75))
+                        .cornerRadius(12)
                 }
+                .padding(16)
+                .tint(.orange)
+                
+            }else{
+                NavigationLink(destination: UploadView()){
+                    Text("Get Started")
+                        .font(.title)
+                        .tint(Color.primary)
+                        .padding(12)
+                        .bold()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.orange.opacity(0.75))
+                        .cornerRadius(12)
+                }
+                .padding(16)
+                .tint(.orange)
             }
-             */
             
-            NavigationLink(destination: UploadView()){
-                Text("Get Started") //Change to "Upload" when jumpshot data
-                    .font(.title)
-                    .tint(Color.primary)
-                    .padding(12)
-                    .bold()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.orange.opacity(0.75))
-                    .cornerRadius(12)
-            }
-            .padding(16)
-            .tint(.blue)
+            
         }
         .navigationBarBackButtonHidden(true)
     }
