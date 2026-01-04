@@ -16,7 +16,7 @@ class ShotAnalysisService{
     func analyzeVideo(videoURL: URL, completion: @escaping (Result<ShotAnalysisResponse, Error>) -> Void){
         
         let boundary = UUID().uuidString
-        let url = URL(string: "http://ADDRESS/analyze")!
+        let url = URL(string: "http://loaclhost:8000/analyze")! // Replace localhost with your LAN IP for local network
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
