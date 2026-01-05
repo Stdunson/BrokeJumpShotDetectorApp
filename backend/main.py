@@ -77,7 +77,7 @@ async def lifespan(app: FastAPI):
         print(f"Error initializing PoseClassifier: {e}")
         pose_classifier = None
     
-    default_weights_path = Path(__file__).parent.parent / "MLweights" / "broke_jump_shot_detector_weights_v4.pth"
+    default_weights_path = Path(__file__).parent.parent / "MLweights" / "broke_jump_shot_detector_weights_v5.pth"
 
     weights_path = Path(os.getenv("MODEL_WEIGHTS_PATH", default_weights_path))
 
