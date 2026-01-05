@@ -12,8 +12,17 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi import Request
+from fastapi.middleware.cors import CORSMiddleware
 import mediapipe as mp
 from datetime import datetime
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.errors import RateLimitExceeded
+from dotenv import load_dotenv
+
+load_dotenv()
 
 #Parent directory for model import
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -24,7 +33,16 @@ from video_processor import VideoProcessor
 model = None
 device = None
 pose_classifier = None
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["10/minute"]
+)
 
+
+#Environment variables
+MODEL_WEIGHTS_PATH = os.getenv("MODEL_WEIGHTS_PATH")
+API_KEY = os.getenv("API_KEY")
+MAX_VIDEO_MB = int(os.getenv("MAX_VIDEO_MB", "25"))
 
 class PoseMLP(nn.Module):
     def __init__(self, input_dim=135, hidden_dim1=128, hidden_dim2=64, dropout=0.2, output_dim=1):
@@ -49,11 +67,9 @@ class PoseMLP(nn.Module):
 async def lifespan(app: FastAPI):
     global model, device, pose_classifier
     
-    # Startup logic
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
-    # Initialize PoseClassifier
     try:
         pose_classifier = PoseClassifier()
         print("Initialized PoseClassifier")
@@ -61,9 +77,6 @@ async def lifespan(app: FastAPI):
         print(f"Error initializing PoseClassifier: {e}")
         pose_classifier = None
     
-    # Load PyTorch model architecture and weights
-
-
     default_weights_path = Path(__file__).parent.parent / "MLweights" / "broke_jump_shot_detector_weights_v4.pth"
 
     weights_path = Path(os.getenv("MODEL_WEIGHTS_PATH", default_weights_path))
@@ -95,6 +108,9 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+#Rate Limiter
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
 
 #Helper Functions from pose_classifier.py
 def extract_frames_from_video(video_path: str, num_frames: int = 3) -> list:
@@ -232,8 +248,12 @@ async def health_check():
 
 #Uses ML model to classify each phase
 @app.post("/analyze")
-async def analyze_video(file: UploadFile = File(...)):
+@limiter.limit("5/minute")
+async def analyze_video(request: Request, file: UploadFile = File(...)):
     
+    if request.headers.get("X-API-KEY") != API_KEY:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     if model is None:
         raise HTTPException(status_code=500, detail="Model not loaded")
     
@@ -245,6 +265,10 @@ async def analyze_video(file: UploadFile = File(...)):
     
     try:
         contents = await file.read()
+
+        if len(contents) > MAX_VIDEO_MB * 1024 * 1024:
+            raise HTTPException(status_code=413, detail=f"Video file size exceeds the maximum limit of {MAX_VIDEO_MB} MB")
+
         with open(temp_video_path, "wb") as f:
             f.write(contents)
         

@@ -14,4 +14,4 @@ echo ""
 echo "Press Ctrl+C to stop the container"
 echo ""
 
-docker run -p 8000:8000 broke-detector-backend
+docker run --env-file .env -e MODEL_WEIGHTS_PATH=/app/MLweights/broke_jump_shot_detector_weights_v4.pth -p 8000:8000 broke-detector-backend

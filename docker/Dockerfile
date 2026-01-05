@@ -18,6 +18,7 @@ COPY . .
 
 #Path to model weights
 ENV MODEL_WEIGHTS_PATH=/app/MLweights/broke_jump_shot_detector_weights_v4.pth
+ENV MAX_VIDEO_MB=25
 
 EXPOSE 8000
 

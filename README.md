@@ -72,5 +72,6 @@ MLP with mediapipe keypoins, phase as inputs, trained using PyTorch
 2. Download on iPhone using Xcode (won't work properly on simulator)
 3. **If using Docker locally on your Mac:**
    - The app will connect to `http://localhost:8000/analyze` - this only works if running the app on the same machine as Docker
+   - ENV file must be created and defined
 4. **If running the backend on another machine:**
    - Update `ShotAnalysisService.swift` and change `localhost` to your device's LAN address 
