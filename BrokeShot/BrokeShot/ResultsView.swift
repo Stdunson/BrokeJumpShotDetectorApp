@@ -38,6 +38,14 @@ struct ResultsView: View {
                     .onReceive(Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()) { _ in
                         loadingMessageIndex += 1
                     }
+            }else if myScore == -2{
+                Text("ERROR: Jumpshot Evaluation Failed")
+                    .font(.largeTitle)
+                    .bold()
+                    .padding(.horizontal)
+                    .padding(.top, 24)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
             }else{
                 ScrollView{
                     Text("Your Jumpshot is...")
@@ -127,6 +135,9 @@ struct ResultsView: View {
                 let newShot = jumpshot(shot: shot, score: myScore)
                 modelContext.insert(newShot)
             }
+        }
+        .onChange(of: vm.errorMessage) {
+            myScore = -2
         }
         .navigationBarBackButtonHidden(true)
     }

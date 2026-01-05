@@ -21,7 +21,7 @@ class ShotAnalysisService{
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        request.setValue("API-KEY", forHTTPHeaderField: "X-API-Key")
+        request.setValue("API_KEY", forHTTPHeaderField: "X-API-Key")
 
 
         var body = Data()
