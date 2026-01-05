@@ -17,11 +17,13 @@ struct ResultsView: View {
     
     var pastData: jumpshot?
     
-    let loadingMessages = ["Loading", "Loading.", "Loading..", "Loading..."]
+    let loadingMessages = ["Analyzing", "Analyzing.", "Analyzing..", "Analyzing..."]
     
     @State var myScore: Int = -1
     
     @State private var loadingMessageIndex: Int = 0
+    
+    @State var errorMess: String = "ERROR: JumpShot Evaluation Failed"
     
     @StateObject private var vm = ShotAnalysisViewModel()
     
@@ -39,7 +41,7 @@ struct ResultsView: View {
                         loadingMessageIndex += 1
                     }
             }else if myScore == -2{
-                Text("ERROR: Jumpshot Evaluation Failed")
+                Text("ERROR: " + errorMess)
                     .font(.largeTitle)
                     .bold()
                     .padding(.horizontal)
@@ -136,8 +138,12 @@ struct ResultsView: View {
                 modelContext.insert(newShot)
             }
         }
-        .onChange(of: vm.errorMessage) {
+        .onChange(of: vm.errorMessage) { oldValue, newValue in
             myScore = -2
+            if let message = newValue {
+                errorMess = message
+            }
+            
         }
         .navigationBarBackButtonHidden(true)
     }
