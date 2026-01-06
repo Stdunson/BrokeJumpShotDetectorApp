@@ -89,7 +89,7 @@ async def lifespan(app: FastAPI):
             model = PoseMLP(input_dim=135, hidden_dim1=128, hidden_dim2=64, dropout=0.2, output_dim=1)
             model = model.to(device)
             
-            state_dict = torch.load(weights_path, map_location=device, weights_only=True)
+            state_dict = torch.load(weights_path, map_location=device, weights_only=False)
             model.load_state_dict(state_dict)
             model.eval()
             print(f"Loaded model weights from {weights_path}")
