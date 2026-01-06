@@ -127,6 +127,7 @@ coverage.xml
 .mypy_cache
 .dmypy.json
 dmypy.json
+.env
 
 # PyTorch model files
 *.pt

@@ -65,7 +65,7 @@ struct UploadView: View {
                         .cornerRadius(12)
                 }
                 .padding()
-                .tint(.blue)
+                .tint(.orange)
             }
             
         }

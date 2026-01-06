@@ -16,12 +16,14 @@ class ShotAnalysisService{
     func analyzeVideo(videoURL: URL, completion: @escaping (Result<ShotAnalysisResponse, Error>) -> Void){
         
         let boundary = UUID().uuidString
-        let url = URL(string: "http://ADDRESS/analyze")!
+        let url = URL(string: "http://ADDRESS/analyze")! // Replace localhost with your LAN IP for local network
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        
+        request.setValue("API_KEY", forHTTPHeaderField: "X-API-Key")
+
+
         var body = Data()
         
         body.append("--\(boundary)\r\n".data(using: .utf8)!)

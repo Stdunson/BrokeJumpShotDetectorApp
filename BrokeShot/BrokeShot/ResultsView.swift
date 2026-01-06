@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import Combine
 
 struct ResultsView: View {
     
@@ -16,14 +17,31 @@ struct ResultsView: View {
     
     var pastData: jumpshot?
     
+    let loadingMessages = ["Analyzing", "Analyzing.", "Analyzing..", "Analyzing..."]
+    
     @State var myScore: Int = -1
+    
+    @State private var loadingMessageIndex: Int = 0
+    
+    @State var errorMess: String = "ERROR: JumpShot Evaluation Failed"
     
     @StateObject private var vm = ShotAnalysisViewModel()
     
     var body: some View {
         NavigationStack{
             if myScore == -1 {
-                Text("Loading...")
+                Text(loadingMessages[loadingMessageIndex % loadingMessages.count])
+                    .font(.largeTitle)
+                    .bold()
+                    .padding(.horizontal)
+                    .padding(.top, 24)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
+                    .onReceive(Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()) { _ in
+                        loadingMessageIndex += 1
+                    }
+            }else if myScore == -2{
+                Text("ERROR: " + errorMess)
                     .font(.largeTitle)
                     .bold()
                     .padding(.horizontal)
@@ -102,7 +120,7 @@ struct ResultsView: View {
                     .cornerRadius(12)
                     .padding(16)
             }
-            .tint(.blue)
+            .tint(.orange)
                 
         }
         .onAppear {
@@ -119,6 +137,13 @@ struct ResultsView: View {
                 let newShot = jumpshot(shot: shot, score: myScore)
                 modelContext.insert(newShot)
             }
+        }
+        .onChange(of: vm.errorMessage) { oldValue, newValue in
+            myScore = -2
+            if let message = newValue {
+                errorMess = message
+            }
+            
         }
         .navigationBarBackButtonHidden(true)
     }
