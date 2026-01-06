@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y \
     libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
-#Install dependencies
-COPY backend/requirements.txt backend/requirements.txt
+#Install dependencies(Change requirements file based on OS)
+COPY backend/requirements_linux.txt backend/requirements.txt 
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
 ARG MODEL_URL
