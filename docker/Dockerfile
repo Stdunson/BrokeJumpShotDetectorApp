@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -17,8 +17,13 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 ARG MODEL_URL
 ENV MODEL_WEIGHTS_PATH=/app/MLweights/broke_jump_shot_detector_weights_v5.pth
 
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl \
+ && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /app/MLweights \
- && curl -L $MODEL_URL -o $MODEL_WEIGHTS_PATH
+  && curl -L "$MODEL_URL" -o "$MODEL_WEIGHTS_PATH" \
+  && ls -lh /app/MLweights
 
 COPY . .
 
