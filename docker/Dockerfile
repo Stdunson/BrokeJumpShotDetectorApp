@@ -14,10 +14,15 @@ RUN apt-get update && apt-get install -y \
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
+ARG MODEL_URL
+ENV MODEL_WEIGHTS_PATH=/app/MLweights/broke_jump_shot_detector_weights_v5.pth
+
+RUN mkdir -p /app/MLweights \
+ && curl -L $MODEL_URL -o $MODEL_WEIGHTS_PATH
+
 COPY . .
 
 #Path to model weights
-ENV MODEL_WEIGHTS_PATH=/app/MLweights/broke_jump_shot_detector_weights_v5.pth
 ENV MAX_VIDEO_MB=25
 
 EXPOSE 8000

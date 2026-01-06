@@ -5,7 +5,13 @@
 set -e
 
 echo "Building BrokeShot backend Docker image..."
-docker build -f docker/Dockerfile -t broke-detector-backend .
+
+#Old: docker build -f docker/Dockerfile -t broke-detector-backend .
+docker build \
+  -f docker/Dockerfile \
+  --build-arg MODEL_URL="https://huggingface.co/Stdunson/BrokeJumpshotDetectorWeights" \
+  -t broke-jumpshot-backend .
+
 
 echo "Starting BrokeShot backend container..."
 echo "FastAPI server will be available at http://localhost:8000"
