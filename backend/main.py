@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 import torch
 import torch.nn as nn
+import gc
 from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, File, UploadFile, HTTPException
@@ -370,9 +371,20 @@ async def analyze_video(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=f"Error processing video: {str(e)}")
     
     finally:
-        # Remove temporary files and directories
+        #Remove temporary files and directories
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
+
+        #Clear remaining references
+        best_frames = None
+        results = None
+        
+        #Force garbage collection
+        gc.collect()
+        
+        #If using CUDA, clear cache
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
 
 if __name__ == "__main__":
